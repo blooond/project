@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.repository.UserRepository;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -25,6 +27,12 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     public User registration(UserDto dto) {
+        Optional<User> userOptional = userRepository.findByUsername(dto.getUsername());
+        if (userOptional.isPresent()) {
+            log.info("User with username '{}' already exists", dto.getUsername());
+            throw new IllegalStateException();
+        }
+
         List<Role> roles = new ArrayList<>();
 
         for (String name : dto.getRoles())
@@ -53,11 +61,12 @@ public class UserService {
         return allUsers;
     }
 
-    public User findByUsername(String username) {
-        User user = userRepository.findUserByUsername(username);
+    public Optional<User> findByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
 
-        if (user == null) {
-            throw new IllegalStateException("Can't find user with username '" + username + "'");
+        if (user.isEmpty()) {
+            log.info("User with username '{}' doesn't exist", username);
+            throw new IllegalStateException();
         }
 
         log.info("User was found by username '{}'", username);

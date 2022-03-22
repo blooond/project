@@ -1,6 +1,5 @@
 package com.example.jwtoken.security;
 
-import com.example.jwtoken.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +25,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private JwtProvider jwtProvider;
     private UserDetailsServiceImpl userDetailsService;
-    private static final String ROLE_ADMIN = "admin";
-    private static final String ROLE_USER = "user";
-    private static final String LOGIN_ENDPOINT = "/login";
+    private static final String ROLE_STUDENT = "student";
+    private static final String ROLE_TEACHER = "teacher";
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -56,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/registration").permitAll()
-                .antMatchers("/hello").hasAuthority("admin")
+                .antMatchers(HttpMethod.POST, "/subjects/new").hasAuthority(ROLE_TEACHER)
                 .anyRequest().authenticated();
     }
 

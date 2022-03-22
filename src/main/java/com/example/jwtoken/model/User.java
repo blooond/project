@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -40,13 +38,13 @@ public class User extends BaseEntity {
 
     public User(String username, String name, String email, String password, List<Role> roles,
                 Date created, Date updated, Status status) {
+        super(created, updated, status);
         this.username = username;
         this.name = name;
         this.email = email;
         this.password = password;
         this.roles = roles;
-        setCreated(created);
-        setUpdated(updated);
-        setStatus(status);
+        teacherSubjects = new ArrayList<>();
+        studentSubjects = new HashSet<>();
     }
 }

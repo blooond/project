@@ -2,6 +2,7 @@ package com.example.jwtoken.model;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +13,7 @@ import java.util.Date;
 @MappedSuperclass
 @Getter
 @Setter
+@NoArgsConstructor
 public class BaseEntity {
 
     @Id
@@ -31,4 +33,10 @@ public class BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    public BaseEntity(Date created, Date updated, Status status) {
+        this.created = created;
+        this.updated = updated;
+        this.status = status;
+    }
 }

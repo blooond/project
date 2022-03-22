@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,12 +22,10 @@ import com.example.jwtoken.service.UserService;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
+@Log4j2
 public class JwtProvider {
 
     private final UserService userService;
@@ -50,9 +50,8 @@ public class JwtProvider {
     public String getToken(String username) {
 
         Claims claims = Jwts.claims().setSubject(username);
-        User user = userService.findByUsername(username);
-        claims.put("roles", getRoleNames(user.getRoles()));
-
+        Optional<User> userOptional = userService.findByUsername(username);
+        userOptional.ifPresent(user -> claims.put("roles", getRoleNames(user.getRoles())));
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtLifetime);
 

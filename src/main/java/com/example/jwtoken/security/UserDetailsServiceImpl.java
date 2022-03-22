@@ -11,6 +11,8 @@ import com.example.jwtoken.security.jwt.JwtUser;
 import com.example.jwtoken.security.jwt.JwtUserFactory;
 import com.example.jwtoken.service.UserService;
 
+import java.util.Optional;
+
 @Log4j2
 @Service
 @AllArgsConstructor
@@ -20,13 +22,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUsername(username);
+        Optional<User> userOptional = userService.findByUsername(username);
 
-        if (user == null) {
-            throw new UsernameNotFoundException("Can't find user with username '" + username + "'");
+        if (userOptional.isEmpty()) {
+            log.info("Can't find user with username '{}'", username);
+            throw new IllegalStateException();
         }
 
-        JwtUser jwtUser = JwtUserFactory.create(user);
+        JwtUser jwtUser = JwtUserFactory.create(userOptional.get());
         log.info("Loaded user with username '{}'", username);
 
         return jwtUser;
