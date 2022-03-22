@@ -6,6 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +31,12 @@ public class User extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private List<Role> roles;
+
+    @OneToMany(mappedBy = "teacher")
+    private List<Subject> teacherSubjects;
+
+    @ManyToMany(mappedBy = "enrolledStudents")
+    private Set<Subject> studentSubjects;
 
     public User(String username, String name, String email, String password, List<Role> roles,
                 Date created, Date updated, Status status) {
