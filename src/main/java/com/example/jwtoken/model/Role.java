@@ -2,10 +2,7 @@ package com.example.jwtoken.model;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +13,15 @@ import java.util.List;
 @Getter
 @Setter
 public class Role extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
+    @SequenceGenerator(
+            name = "sequence_generator",
+            sequenceName = "role_sequence",
+            allocationSize = 1
+    )
+    private Long id;
 
     private String name;
 

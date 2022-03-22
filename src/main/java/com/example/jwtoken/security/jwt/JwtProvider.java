@@ -47,7 +47,14 @@ public class JwtProvider {
 
         Claims claims = Jwts.claims().setSubject(username);
         Optional<User> userOptional = userService.findByUsername(username);
-        userOptional.ifPresent(user -> claims.put("roles", getRoleNames(user.getRoles())));
+
+        userOptional.ifPresentOrElse(
+                user -> claims.put("roles", getRoleNames(user.getRoles())),
+                () -> {
+                    log.info("User with username '{}' not found", username);
+                    throw new IllegalStateException();
+                });
+
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtLifetime);
 

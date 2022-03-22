@@ -2,14 +2,20 @@ package com.example.jwtoken.service;
 
 import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.Status;
+import com.example.jwtoken.model.Subject;
+import com.example.jwtoken.repository.SubjectRepository;
+import com.example.jwtoken.security.jwt.JwtUser;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,9 +27,10 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
 
+    private BCryptPasswordEncoder passwordEncoder;
     private UserRepository userRepository;
     private RoleRepository roleRepository;
-    private BCryptPasswordEncoder passwordEncoder;
+    private SubjectRepository subjectRepository;
 
     public User registration(UserDto dto) {
         Optional<User> userOptional = userRepository.findByUsername(dto.getUsername());
@@ -52,6 +59,31 @@ public class UserService {
 
         log.info("User {} successfully registered", user.getUsername());
         return user;
+    }
+
+    @Transactional
+    public User enroll(Long subjectId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        Optional<User> studentOptional = userRepository.findByUsername(jwtUser.getUsername());
+        if (studentOptional.isEmpty()) {
+            log.info("Student with username '{}' doesn't exist", jwtUser.getUsername());
+            throw new IllegalStateException();
+        }
+
+        Optional<Subject> subjectOptional = subjectRepository.findById(subjectId);
+        subjectOptional.ifPresentOrElse(
+                subject -> {
+                    studentOptional.get().getStudentSubjects().add(subject);
+                    subject.getEnrolledStudents().add(studentOptional.get());
+                },
+                () -> {
+                    log.info("Subject with id '{}' doesn't exist", subjectId);
+                    throw new IllegalStateException();
+                }
+        );
+
+        return studentOptional.get();
     }
 
     public List<User> getAll() {

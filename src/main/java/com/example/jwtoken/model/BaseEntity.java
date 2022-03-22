@@ -16,15 +16,6 @@ import java.util.Date;
 @Setter
 public class BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
-    @SequenceGenerator(
-            name = "sequence_generator",
-            sequenceName = "sequence_id",
-            allocationSize = 1
-    )
-    private Long id;
-
     @CreatedDate
     private Date created;
 

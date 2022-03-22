@@ -13,6 +13,15 @@ import java.util.*;
 @Setter
 public class User extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_generator")
+    @SequenceGenerator(
+            name = "sequence_generator",
+            sequenceName = "user_sequence",
+            allocationSize = 1
+    )
+    private Long id;
+
     private String username;
 
     private String name;
