@@ -11,14 +11,13 @@ import org.springframework.stereotype.Service;
 import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.repository.UserRepository;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Log4j2
 @Service
+@Log4j2
 @AllArgsConstructor
 public class UserService {
 
@@ -62,26 +61,27 @@ public class UserService {
     }
 
     public Optional<User> findByUsername(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> userOptional = userRepository.findByUsername(username);
 
-        if (user.isEmpty()) {
+        if (userOptional.isEmpty()) {
             log.info("User with username '{}' doesn't exist", username);
             throw new IllegalStateException();
         }
 
         log.info("User was found by username '{}'", username);
-        return user;
+        return userOptional;
     }
 
-    public User findById(Long id) {
-        User user = userRepository.findUserById(id);
+    public Optional<User> findById(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
 
-        if (user == null) {
-            throw new IllegalStateException("Can't find user with id '" + id + "'");
+        if (userOptional.isEmpty()) {
+            log.info("User with id '{}' doesn't exist", id);
+            throw new IllegalStateException();
         }
 
         log.info("User found by id '{}'", id );
-        return user;
+        return userOptional;
     }
 
     public void delete(Long id) {

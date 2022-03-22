@@ -8,9 +8,9 @@ import java.util.*;
 
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class User extends BaseEntity {
 
     private String username;

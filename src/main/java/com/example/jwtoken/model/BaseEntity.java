@@ -11,9 +11,9 @@ import javax.persistence.*;
 import java.util.Date;
 
 @MappedSuperclass
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class BaseEntity {
 
     @Id
