@@ -95,24 +95,28 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         Optional<User> userOptional = userRepository.findByUsername(username);
 
-        if (userOptional.isEmpty()) {
-            log.info("User with username '{}' doesn't exist", username);
-            throw new IllegalStateException();
-        }
+        userOptional.ifPresentOrElse(
+                user -> log.info("User was found by username '{}'", username),
+                () -> {
+                    log.info("User with username '{}' doesn't exist", username);
+                    throw new IllegalStateException();
+                }
+        );
 
-        log.info("User was found by username '{}'", username);
         return userOptional;
     }
 
     public Optional<User> findById(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
 
-        if (userOptional.isEmpty()) {
-            log.info("User with id '{}' doesn't exist", id);
-            throw new IllegalStateException();
-        }
+        userOptional.ifPresentOrElse(
+                user -> log.info("User was found by id '{}'", id),
+                () -> {
+                    log.info("User with id '{}' doesn't exist", id);
+                    throw new IllegalStateException();
+                }
+        );
 
-        log.info("User found by id '{}'", id );
         return userOptional;
     }
 

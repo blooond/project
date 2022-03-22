@@ -25,22 +25,24 @@ public class SubjectService {
 
     public Subject create(SubjectDto dto) {
         Optional<Subject> subjectOptional = subjectRepository.findByName(dto.getName());
-        if (subjectOptional.isPresent()) {
-            log.info("Subject with name '{}' already exists", dto.getName());
-        }
+        subjectOptional.ifPresent(
+                subject -> log.info("Subject with name '{}' already exists", dto.getName())
+        );
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> teacher = userService.findByUsername(jwtUser.getUsername());
-
-        if (teacher.isEmpty()) {
-            log.info("IN Subject create()");
-            throw new IllegalStateException("Teacher optional is empty");
-        }
+        Optional<User> teacherOptional = userService.findByUsername(jwtUser.getUsername());
+        teacherOptional.ifPresentOrElse(
+                teacher -> log.info("Teacher with username '{}' loaded", teacher.getUsername()),
+                () -> {
+                    log.info("IN Subject create()");
+                    throw new IllegalStateException("Teacher optional is empty");
+                }
+        );
 
         Subject subject = new Subject(
                 dto.getName(),
-                teacher.get(),
+                teacherOptional.get(),
                 new Date(),
                 new Date(),
                 Status.ACTIVE

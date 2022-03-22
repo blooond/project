@@ -1,5 +1,6 @@
 package com.example.jwtoken.security;
 
+import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import com.example.jwtoken.model.User;
@@ -24,14 +25,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userService.findByUsername(username);
 
-        if (userOptional.isEmpty()) {
-            log.info("Can't find user with username '{}'", username);
-            throw new IllegalStateException();
-        }
+        userOptional.ifPresentOrElse(
+                user -> log.info("Loaded user with username '{}'", username),
+                () -> {
+                    log.info("Can't find user with username '{}'", username);
+                    throw new IllegalStateException();
+                }
+        );
 
-        JwtUser jwtUser = JwtUserFactory.create(userOptional.get());
-        log.info("Loaded user with username '{}'", username);
-
-        return jwtUser;
+        return JwtUserFactory.create(userOptional.get());
     }
 }
