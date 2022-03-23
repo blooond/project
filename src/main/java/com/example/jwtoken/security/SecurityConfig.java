@@ -3,6 +3,7 @@ package com.example.jwtoken.security;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -55,7 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/registration").permitAll()
                 .antMatchers(HttpMethod.POST, "/subjects/new").hasAuthority(ROLE_TEACHER)
-                .antMatchers(HttpMethod.POST, "students/**").hasAuthority(ROLE_STUDENT)
+                .antMatchers(HttpMethod.POST, "/students/**").hasAuthority(ROLE_STUDENT)
+                .antMatchers(HttpMethod.POST, "/marks/**").hasAuthority(ROLE_STUDENT)
                 .anyRequest().authenticated();
     }
 

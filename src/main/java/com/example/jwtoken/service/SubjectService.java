@@ -53,4 +53,18 @@ public class SubjectService {
         log.info("Subject with name '{}' created", dto.getName());
         return subject;
     }
+
+    public Optional<Subject> findById(Long id) {
+        Optional<Subject> subjectOptional = subjectRepository.findById(id);
+
+        subjectOptional.ifPresentOrElse(
+                user -> log.info("Subject was found by id '{}'", id),
+                () -> {
+                    log.info("Subject with id '{}' doesn't exist", id);
+                    throw new IllegalStateException();
+                }
+        );
+
+        return subjectOptional;
+    }
 }
