@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,6 +50,12 @@ public class MarkService {
                 }
         );
 
+        if (!studentOptional.get().getStudentSubjects().contains(subjectOptional.get())) {
+            log.info("Student with username '{}' doesn't attend subject '{}'",
+                    studentOptional.get().getUsername(),
+                    subjectOptional.get().getName());
+        }
+
         Mark mark = new Mark(
                 new MarkKey(jwtUser.getId(), subjectId),
                 studentOptional.get(),
@@ -60,4 +67,8 @@ public class MarkService {
 
         return mark;
     }
+
+//    public List<Integer> getAll(Long subjectId) {
+//
+//    }
 }

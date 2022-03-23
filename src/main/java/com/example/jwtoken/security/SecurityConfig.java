@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/registration").permitAll()
                 .antMatchers(HttpMethod.POST, "/subjects/new").hasAuthority(ROLE_TEACHER)
                 .antMatchers(HttpMethod.POST, "/students/**").hasAuthority(ROLE_STUDENT)
-                .antMatchers(HttpMethod.POST, "/marks/**").hasAuthority(ROLE_STUDENT)
+                .antMatchers(HttpMethod.POST, "/marks/subjects/*/new").hasAuthority(ROLE_STUDENT)
                 .anyRequest().authenticated();
     }
 

@@ -4,10 +4,9 @@ import com.example.jwtoken.dto.MarkDto;
 import com.example.jwtoken.model.Mark;
 import com.example.jwtoken.service.MarkService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -20,4 +19,7 @@ public class MarksController {
                        @RequestBody MarkDto dto) {
         return markService.create(dto, subjectId);
     }
+
+//    @GetMapping("/marks/subjects/{subjectId}")
+//    public List<Integer> s
 }
