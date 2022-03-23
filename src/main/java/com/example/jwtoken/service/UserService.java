@@ -106,7 +106,7 @@ public class UserService {
         return userOptional;
     }
 
-    public Optional<User> findById(Long id) {
+    public User findById(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
 
         userOptional.ifPresentOrElse(
@@ -117,7 +117,7 @@ public class UserService {
                 }
         );
 
-        return userOptional;
+        return userOptional.get();
     }
 
     public void delete(Long id) {
