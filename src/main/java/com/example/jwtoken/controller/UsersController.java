@@ -23,9 +23,14 @@ public class UsersController {
         return userService.findById(userId);
     }
 
-    @PutMapping("users/update")
+    @PutMapping("/users/update")
     public User update(@RequestBody UserDto dto) {
         return userService.update(dto);
+    }
+
+    @DeleteMapping("/users/delete")
+    public void delete() {
+        userService.delete();
     }
 
     @PutMapping("/students/enroll/{subjectId}")

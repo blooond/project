@@ -63,19 +63,13 @@ public class UserService {
 
     @Transactional
     public User enroll(Long subjectId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> studentOptional = userRepository.findByUsername(jwtUser.getUsername());
-        if (studentOptional.isEmpty()) {
-            log.info("Student with username '{}' doesn't exist", jwtUser.getUsername());
-            throw new IllegalStateException();
-        }
+        User student = getCurrentUser();
 
         Optional<Subject> subjectOptional = subjectRepository.findById(subjectId);
         subjectOptional.ifPresentOrElse(
                 subject -> {
-                    studentOptional.get().getStudentSubjects().add(subject);
-                    subject.getEnrolledStudents().add(studentOptional.get());
+                    student.getStudentSubjects().add(subject);
+                    subject.getEnrolledStudents().add(student);
                 },
                 () -> {
                     log.info("Subject with id '{}' doesn't exist", subjectId);
@@ -83,7 +77,7 @@ public class UserService {
                 }
         );
 
-        return studentOptional.get();
+        return student;
     }
 
     public List<User> getAll() {
@@ -122,18 +116,7 @@ public class UserService {
 
     @Transactional
     public User update(UserDto dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> userOptional = userRepository.findByUsername(jwtUser.getUsername());
-        userOptional.ifPresentOrElse(
-                user -> log.info("User was found by username '{}'", user.getUsername()),
-                () -> {
-                    log.info("User with username '{}' doesn't exist", jwtUser.getUsername());
-                    throw new IllegalStateException();
-                }
-        );
-
-        User userToUpdate = userOptional.get();
+        User userToUpdate = getCurrentUser();
 
         if (dto.getName() != null)
             userToUpdate.setName(dto.getName());
@@ -150,8 +133,23 @@ public class UserService {
         return userToUpdate;
     }
 
-    public void delete(Long id) {
-        userRepository.deleteById(id);
-        log.info("User with id  {} was deleted", id);
+    public void delete() {
+        User userToDelete = getCurrentUser();
+        userRepository.deleteById(userToDelete.getId());
+        log.info("User with id  {} was deleted", userToDelete.getId());
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        Optional<User> userOptional = userRepository.findByUsername(jwtUser.getUsername());
+        userOptional.ifPresentOrElse(
+                user -> log.info("User was found by username '{}'", user.getUsername()),
+                () -> {
+                    log.info("User with username '{}' doesn't exist", jwtUser.getUsername());
+                    throw new IllegalStateException();
+                }
+        );
+        return userOptional.get();
     }
 }
