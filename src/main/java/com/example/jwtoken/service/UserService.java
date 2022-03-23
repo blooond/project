@@ -120,6 +120,36 @@ public class UserService {
         return userOptional.get();
     }
 
+    @Transactional
+    public User update(UserDto dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        Optional<User> userOptional = userRepository.findByUsername(jwtUser.getUsername());
+        userOptional.ifPresentOrElse(
+                user -> log.info("User was found by username '{}'", user.getUsername()),
+                () -> {
+                    log.info("User with username '{}' doesn't exist", jwtUser.getUsername());
+                    throw new IllegalStateException();
+                }
+        );
+
+        User userToUpdate = userOptional.get();
+
+        if (dto.getName() != null)
+            userToUpdate.setName(dto.getName());
+
+        if (dto.getUsername() != null)
+            userToUpdate.setUsername(dto.getUsername());
+
+        if (dto.getEmail() != null)
+            userToUpdate.setEmail(dto.getEmail());
+
+        if (dto.getPassword() != null)
+            userToUpdate.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        return userToUpdate;
+    }
+
     public void delete(Long id) {
         userRepository.deleteById(id);
         log.info("User with id  {} was deleted", id);

@@ -13,14 +13,19 @@ public class UsersController {
 
     private UserService userService;
 
+    @PostMapping("/registration")
+    public User registration(@RequestBody UserDto dto) {
+        return userService.registration(dto);
+    }
+
     @GetMapping("/users/{userId}")
     public User show(@PathVariable Long userId) {
         return userService.findById(userId);
     }
 
-    @PostMapping("/registration")
-    public User registration(@RequestBody UserDto dto) {
-        return userService.registration(dto);
+    @PutMapping("users/update")
+    public User update(@RequestBody UserDto dto) {
+        return userService.update(dto);
     }
 
     @PutMapping("/students/enroll/{subjectId}")
