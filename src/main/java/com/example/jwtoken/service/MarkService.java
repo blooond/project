@@ -15,8 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -68,7 +71,20 @@ public class MarkService {
         return mark;
     }
 
-//    public List<Integer> getAll(Long subjectId) {
-//
-//    }
+    public List<Integer> getAll(Long subjectId) {
+        Optional<Subject> subjectOptional = subjectService.findById(subjectId);
+        subjectOptional.ifPresentOrElse(
+                subject -> log.info("Subject with id '{}' loaded", subject.getId()),
+                () -> {
+                    log.info("Subject with id '{}' doesn't exist", subjectId);
+                    throw new IllegalStateException();
+                }
+        );
+
+
+        return markRepository.findAll().stream()
+                .filter(mark -> Objects.equals(mark.getSubject().getId(), subjectId))
+                .map(Mark::getRate)
+                .collect(Collectors.toList());
+    }
 }
