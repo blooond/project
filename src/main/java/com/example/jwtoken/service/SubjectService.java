@@ -67,4 +67,8 @@ public class SubjectService {
 
         return subjectOptional;
     }
+
+    public Subject show(Long subjectId) {
+        return findById(subjectId).get();
+    }
 }

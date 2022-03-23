@@ -4,10 +4,7 @@ import com.example.jwtoken.dto.SubjectDto;
 import com.example.jwtoken.model.Subject;
 import com.example.jwtoken.service.SubjectService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -19,5 +16,10 @@ public class SubjectsController {
     @PostMapping("/new")
     private Subject create(@RequestBody SubjectDto dto) {
         return subjectService.create(dto);
+    }
+
+    @GetMapping("/{subjectId}")
+    private Subject show(@PathVariable Long subjectId) {
+        return subjectService.show(subjectId);
     }
 }
