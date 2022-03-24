@@ -53,14 +53,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/login").permitAll()
-                .antMatchers(HttpMethod.POST, "/registration").permitAll()
-                .antMatchers(HttpMethod.GET, "/users/**").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
-                .antMatchers(HttpMethod.GET, "/subjects/*").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
-                .antMatchers(HttpMethod.POST, "/marks/subjects/*").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
-                .antMatchers(HttpMethod.POST, "/subjects/new").hasAuthority(ROLE_TEACHER)
-                .antMatchers(HttpMethod.POST, "/students/**").hasAuthority(ROLE_STUDENT)
-                .antMatchers(HttpMethod.POST, "/marks/subjects/**").hasAuthority(ROLE_STUDENT)
+                .antMatchers( "/login").permitAll()
+                .antMatchers("/registration").permitAll()
+                .antMatchers("/users/**").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
+                .antMatchers("/students/**").hasAuthority(ROLE_STUDENT)
+                .antMatchers( "/subjects/new").hasAuthority(ROLE_TEACHER)
+                .antMatchers("/subjects/*").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
+                .antMatchers("/marks/subjects/*").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
+                .antMatchers("/marks/subjects/**").hasAuthority(ROLE_STUDENT)
                 .anyRequest().authenticated();
     }
 
