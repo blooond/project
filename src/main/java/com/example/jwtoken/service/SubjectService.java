@@ -11,8 +11,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -29,20 +31,9 @@ public class SubjectService {
                 subject -> log.info("Subject with name '{}' already exists", dto.getName())
         );
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> teacherOptional = userService.findByUsername(jwtUser.getUsername());
-        teacherOptional.ifPresentOrElse(
-                teacher -> log.info("Teacher with username '{}' loaded", teacher.getUsername()),
-                () -> {
-                    log.info("IN Subject create()");
-                    throw new IllegalStateException("Teacher optional is empty");
-                }
-        );
-
         Subject subject = new Subject(
                 dto.getName(),
-                teacherOptional.get(),
+                getCurrentUser(),
                 new Date(),
                 new Date(),
                 Status.ACTIVE
@@ -58,7 +49,7 @@ public class SubjectService {
         Optional<Subject> subjectOptional = subjectRepository.findById(id);
 
         subjectOptional.ifPresentOrElse(
-                user -> log.info("Subject was found by id '{}'", id),
+                subject -> log.info("Subject was found by id '{}'", id),
                 () -> {
                     log.info("Subject with id '{}' doesn't exist", id);
                     throw new IllegalStateException();
@@ -71,8 +62,44 @@ public class SubjectService {
     public Subject show(Long subjectId) {
         return findById(subjectId).get();
     }
-//
-//    public Subject update(SubjectDto subjectDto) {
-//
-//    }
+
+    @Transactional
+    public Subject update(Long subjectId, SubjectDto subjectDto) {
+        Optional<Subject> subjectOptional = subjectRepository.findById(subjectId);
+        subjectOptional.ifPresentOrElse(
+                subject -> log.info("Subject was found by id '{}'", subjectId),
+                () -> {
+                    log.info("Subject with id '{}' doesn't exist", subjectId);
+                    throw new IllegalStateException();
+                }
+        );
+
+        Subject subjectToUpdate = subjectOptional.get();
+
+        if (Objects.equals(subjectToUpdate.getTeacher(), getCurrentUser())) {
+            if (subjectDto.getName() != null)
+                subjectToUpdate.setName(subjectDto.getName());
+
+        } else {
+            log.info("Teacher with username '{}' can't update this subject",
+                     getCurrentUser().getUsername());
+            throw new IllegalStateException();
+        }
+
+        return subjectToUpdate;
+    }
+
+    private  User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
+        userOptional.ifPresentOrElse(
+                user -> log.info("User was found by username '{}'", user.getUsername()),
+                () -> {
+                    log.info("User with username '{}' doesn't exist", jwtUser.getUsername());
+                    throw new IllegalStateException();
+                }
+        );
+        return userOptional.get();
+    }
 }

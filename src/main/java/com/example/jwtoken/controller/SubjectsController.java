@@ -14,12 +14,18 @@ public class SubjectsController {
     private SubjectService subjectService;
 
     @PostMapping("/new")
-    private Subject create(@RequestBody SubjectDto dto) {
+    public Subject create(@RequestBody SubjectDto dto) {
         return subjectService.create(dto);
     }
 
     @GetMapping("/{subjectId}")
-    private Subject show(@PathVariable Long subjectId) {
+    public Subject show(@PathVariable Long subjectId) {
         return subjectService.show(subjectId);
+    }
+
+    @PutMapping("/{subjectId}/update")
+    public Subject update(@PathVariable Long subjectId,
+                          @RequestBody SubjectDto dto) {
+        return subjectService.update(subjectId, dto);
     }
 }
