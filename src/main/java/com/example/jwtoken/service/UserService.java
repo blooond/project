@@ -135,7 +135,7 @@ public class UserService {
 
     public void delete() {
         User userToDelete = getCurrentUser();
-        userRepository.deleteById(userToDelete.getId());
+        userRepository.delete(userToDelete);
         log.info("User with id  {} was deleted", userToDelete.getId());
     }
 

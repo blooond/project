@@ -65,15 +65,7 @@ public class SubjectService {
 
     @Transactional
     public Subject update(Long subjectId, SubjectDto subjectDto) {
-        Optional<Subject> subjectOptional = subjectRepository.findById(subjectId);
-        subjectOptional.ifPresentOrElse(
-                subject -> log.info("Subject was found by id '{}'", subjectId),
-                () -> {
-                    log.info("Subject with id '{}' doesn't exist", subjectId);
-                    throw new IllegalStateException();
-                }
-        );
-
+        Optional<Subject> subjectOptional = findById(subjectId);
         Subject subjectToUpdate = subjectOptional.get();
 
         if (Objects.equals(subjectToUpdate.getTeacher(), getCurrentUser())) {
@@ -89,14 +81,28 @@ public class SubjectService {
         return subjectToUpdate;
     }
 
+    public void delete(Long subjectId) {
+        Optional<Subject> subjectOptional = findById(subjectId);
+        Subject subjectToDelete = subjectOptional.get();
+
+        if (Objects.equals(subjectToDelete.getTeacher(), getCurrentUser())) {
+            subjectRepository.delete(subjectToDelete);
+        } else {
+            log.info("Teacher with username '{}' can't update this subject",
+                    getCurrentUser().getUsername());
+            throw new IllegalStateException();
+        }
+
+    }
+
     private  User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
         userOptional.ifPresentOrElse(
-                user -> log.info("User was found by username '{}'", user.getUsername()),
+                user -> log.info("Teacher was found by username '{}'", user.getUsername()),
                 () -> {
-                    log.info("User with username '{}' doesn't exist", jwtUser.getUsername());
+                    log.info("Teacher with username '{}' doesn't exist", jwtUser.getUsername());
                     throw new IllegalStateException();
                 }
         );

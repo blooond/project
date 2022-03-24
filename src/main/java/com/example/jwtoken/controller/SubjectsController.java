@@ -28,4 +28,9 @@ public class SubjectsController {
                           @RequestBody SubjectDto dto) {
         return subjectService.update(subjectId, dto);
     }
+
+    @DeleteMapping("/{subjectId}/delete")
+    public void delete(@PathVariable Long subjectId) {
+        subjectService.delete(subjectId);
+    }
 }
