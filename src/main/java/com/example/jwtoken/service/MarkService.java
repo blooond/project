@@ -33,29 +33,19 @@ public class MarkService {
     private final UserService userService;
 
     public Mark create(MarkDto dto, Long subjectId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> studentOptional = userService.findByUsername(jwtUser.getUsername());
-        studentOptional.ifPresentOrElse(
-                student -> log.info("Student with username '{}' loaded", student.getUsername()),
-                () -> {
-                    log.info("Student with username '{}' doesn't exist", jwtUser.getUsername());
-                    throw new IllegalStateException();
-                }
-        );
-
+        User student = getCurrentUser();
         Optional<Subject> subjectOptional = subjectService.findById(subjectId);
 
-        if (!studentOptional.get().getStudentSubjects().contains(subjectOptional.get())) {
+        if (!student.getStudentSubjects().contains(subjectOptional.get())) {
             log.info("Student with username '{}' doesn't attend subject '{}'",
-                    studentOptional.get().getUsername(),
+                    student.getUsername(),
                     subjectOptional.get().getName());
             throw new IllegalStateException();
         }
 
         Mark mark = new Mark(
-                new MarkKey(jwtUser.getId(), subjectId),
-                studentOptional.get(),
+                new MarkKey(student.getId(), subjectId),
+                student,
                 subjectOptional.get(),
                 dto.getRate());
 
