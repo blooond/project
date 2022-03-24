@@ -45,18 +45,12 @@ public class MarkService {
         );
 
         Optional<Subject> subjectOptional = subjectService.findById(subjectId);
-        subjectOptional.ifPresentOrElse(
-                subject -> log.info("Subject with id '{}' loaded", subject.getId()),
-                () -> {
-                    log.info("Subject with id '{}' doesn't exist", subjectId);
-                    throw new IllegalStateException();
-                }
-        );
 
         if (!studentOptional.get().getStudentSubjects().contains(subjectOptional.get())) {
             log.info("Student with username '{}' doesn't attend subject '{}'",
                     studentOptional.get().getUsername(),
                     subjectOptional.get().getName());
+            throw new IllegalStateException();
         }
 
         Mark mark = new Mark(
@@ -66,25 +60,36 @@ public class MarkService {
                 dto.getRate());
 
         markRepository.save(mark);
-        log.info("Mark '{}' saved", mark);
+        log.info("Mark '{}' saved", mark.getRate());
 
         return mark;
     }
 
     public List<Integer> getAll(Long subjectId) {
         Optional<Subject> subjectOptional = subjectService.findById(subjectId);
-        subjectOptional.ifPresentOrElse(
-                subject -> log.info("Subject with id '{}' loaded", subject.getId()),
-                () -> {
-                    log.info("Subject with id '{}' doesn't exist", subjectId);
-                    throw new IllegalStateException();
-                }
-        );
-
 
         return markRepository.findAll().stream()
-                .filter(mark -> Objects.equals(mark.getSubject().getId(), subjectId))
+                .filter(mark -> Objects.equals(mark.getSubject(), subjectOptional.get()))
                 .map(Mark::getRate)
                 .collect(Collectors.toList());
+    }
+
+    public Integer show(Long subjectId) {
+        Optional<Subject> subjectOptional = subjectService.findById(subjectId);
+
+        return markRepository.findAll().stream()
+                .filter(mark -> Objects.equals(mark.getSubject(), subjectOptional.get())
+                && Objects.equals(mark.getStudent(), getCurrentUser()))
+                .map(Mark::getRate)
+                .collect(Collectors.toList())
+                .get(0);
+    }
+
+    private  User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
+        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
+
+        return userOptional.get();
     }
 }

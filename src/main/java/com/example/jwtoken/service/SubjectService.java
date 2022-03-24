@@ -99,13 +99,7 @@ public class SubjectService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
-        userOptional.ifPresentOrElse(
-                user -> log.info("Teacher was found by username '{}'", user.getUsername()),
-                () -> {
-                    log.info("Teacher with username '{}' doesn't exist", jwtUser.getUsername());
-                    throw new IllegalStateException();
-                }
-        );
+
         return userOptional.get();
     }
 }

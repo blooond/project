@@ -20,8 +20,13 @@ public class MarksController {
         return markService.create(dto, subjectId);
     }
 
-    @GetMapping("/marks/subjects/{subjectId}")
+    @GetMapping("/marks/subjects/{subjectId}/all")
     public List<Integer> showAll(@PathVariable Long subjectId) {
         return markService.getAll(subjectId);
+    }
+
+    @GetMapping("/marks/subjects/{subjectId}")
+    public Integer show(@PathVariable Long subjectId) {
+        return markService.show(subjectId);
     }
 }
