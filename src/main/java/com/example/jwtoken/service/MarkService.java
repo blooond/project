@@ -75,6 +75,21 @@ public class MarkService {
                 .get(0);
     }
 
+    public void delete(Long subjectId) {
+        Optional<Subject> subjectOptional = subjectService.findById(subjectId);
+        Mark markToDelete = markRepository.findAll().stream()
+                .filter(mark -> Objects.equals(mark.getSubject(), subjectOptional.get())
+                        && Objects.equals(mark.getStudent(), getCurrentUser()))
+                .collect(Collectors.toList())
+                .get(0);
+        if (markToDelete != null) {
+            markRepository.delete(markToDelete);
+        } else {
+            log.info("You have no marks on subject with id '{}'", subjectId);
+            throw new IllegalStateException();
+        }
+    }
+
     private  User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();

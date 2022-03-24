@@ -10,23 +10,29 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/marks")
 public class MarksController {
 
     private final MarkService markService;
 
-    @PostMapping("/marks/subjects/{subjectId}/new")
+    @PostMapping("/subjects/{subjectId}/new")
     public Mark create(@PathVariable Long subjectId,
                        @RequestBody MarkDto dto) {
         return markService.create(dto, subjectId);
     }
 
-    @GetMapping("/marks/subjects/{subjectId}/all")
+    @GetMapping("/subjects/{subjectId}/all")
     public List<Integer> showAll(@PathVariable Long subjectId) {
         return markService.getAll(subjectId);
     }
 
-    @GetMapping("/marks/subjects/{subjectId}")
+    @GetMapping("/subjects/{subjectId}")
     public Integer show(@PathVariable Long subjectId) {
         return markService.show(subjectId);
+    }
+
+    @DeleteMapping("/subjects/{subjectId}/delete")
+    public void delete(@PathVariable Long subjectId) {
+        markService.delete(subjectId);
     }
 }
