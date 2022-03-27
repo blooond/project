@@ -55,7 +55,14 @@ public class UserTests {
     @Order(1)
     public void testCreateNewUser() {
         List<Role> studentRoles = new ArrayList<>();
-        studentRoles.add(roleRepository.findByName("student"));
+        studentRoles.add(roleRepository.save(
+                        new Role(
+                                new Date(),
+                                new Date(),
+                                Status.ACTIVE,
+                                "student")
+                )
+        );
         User student = userRepository.save(new User(
                 "studentuser",
                 "student",
@@ -68,7 +75,14 @@ public class UserTests {
         );
 
         List<Role> teacherRoles = new ArrayList<>();
-        teacherRoles.add(roleRepository.findByName("teacher"));
+        teacherRoles.add(roleRepository.save(
+                        new Role(
+                                new Date(),
+                                new Date(),
+                                Status.ACTIVE,
+                                "teacher")
+                )
+        );
         User teacher = userRepository.save(new User(
                 "teacheruser",
                 "teacher",
