@@ -7,7 +7,6 @@ import com.example.jwtoken.model.User;
 import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.repository.SubjectRepository;
 import com.example.jwtoken.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -37,8 +36,8 @@ public class UserTests {
     private final SubjectRepository subjectRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final Long STUDENT_ID = 1L;
-    private final Long TEACHER_ID = 2L;
+    static final Long STUDENT_ID = 1L;
+    static final Long TEACHER_ID = 2L;
 
     @Autowired
     public UserTests(UserRepository userRepository,
