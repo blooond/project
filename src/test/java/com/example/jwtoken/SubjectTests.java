@@ -54,7 +54,14 @@ public class SubjectTests {
     @Rollback(value = false)
     public void testCreateSubject() {
         List<Role> teacherRoles = new ArrayList<>();
-        teacherRoles.add(roleRepository.findByName("teacher"));
+        teacherRoles.add(roleRepository.save(
+                        new Role(
+                                new Date(),
+                                new Date(),
+                                Status.ACTIVE,
+                                "teacher")
+                )
+        );
         User teacher = userRepository.save(new User(
                 "teacheruser",
                 "teacher",
