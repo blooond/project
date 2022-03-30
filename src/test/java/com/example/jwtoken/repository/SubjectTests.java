@@ -1,12 +1,9 @@
-package com.example.jwtoken;
+package com.example.jwtoken.repository;
 
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.Status;
 import com.example.jwtoken.model.Subject;
 import com.example.jwtoken.model.User;
-import com.example.jwtoken.repository.RoleRepository;
-import com.example.jwtoken.repository.SubjectRepository;
-import com.example.jwtoken.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
