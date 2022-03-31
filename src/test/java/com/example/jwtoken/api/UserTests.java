@@ -1,61 +1,60 @@
 package com.example.jwtoken.api;
 
-import com.example.jwtoken.controller.UsersController;
+import com.example.jwtoken.dto.LoginRequestDto;
 import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.Status;
 import com.example.jwtoken.model.User;
-import com.example.jwtoken.repository.UserRepository;
 import com.example.jwtoken.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Rollback
 public class UserTests {
 
-    MockMvc mockMvc;
-    ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     private final User student;
     private final User teacher;
     private final User incorrectUser;
 
+    private static String studentToken = "";
+    private static String teacherToken = "";
+
     @Autowired
-    public UserTests(MockMvc mockMvc, ObjectMapper objectMapper) {
+    public UserTests(MockMvc mockMvc, ObjectMapper objectMapper, UserService userRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.userService = userRepository;
+
         List<Role> studentRoles = new ArrayList<>();
         studentRoles.add(new Role(
                 new Date(),
@@ -99,37 +98,242 @@ public class UserTests {
                 "",
                 "",
                 "",
-                null,
+                studentRoles,
                 new Date(),
                 new Date(),
-                Status.ACTIVE
+                null
         );
     }
 
     @Test
+    @Order(1)
     public void testRegistration_success() throws Exception {
-        List<String> studentRoles = new ArrayList<>();
-        for (Role role : student.getRoles())
-            studentRoles.add(role.getName());
-
         UserDto studentDto = new UserDto(
                 student.getUsername(),
                 student.getName(),
                 student.getEmail(),
                 student.getPassword(),
-                studentRoles
+                stringRoles(student.getRoles())
         );
 
-        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/registration")
+        UserDto teacherDto = new UserDto(
+                teacher.getUsername(),
+                teacher.getName(),
+                teacher.getEmail(),
+                teacher.getPassword(),
+                stringRoles(teacher.getRoles())
+        );
+
+        MockHttpServletRequestBuilder mockRequest1 = MockMvcRequestBuilders.post("/registration")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(studentDto));
 
-        mockMvc.perform(mockRequest)
+        MockHttpServletRequestBuilder mockRequest2 = MockMvcRequestBuilders.post("/registration")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(teacherDto));
+
+        mockMvc.perform(mockRequest1)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
                 .andExpect(jsonPath("$.username", is(student.getUsername())))
                 .andExpect(jsonPath("$.name", is(student.getName())))
                 .andExpect(jsonPath("$.email", is(student.getEmail())));
+
+        mockMvc.perform(mockRequest2)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(teacher.getUsername())))
+                .andExpect(jsonPath("$.name", is(teacher.getName())))
+                .andExpect(jsonPath("$.email", is(teacher.getEmail())));
+    }
+
+//    @Test
+//    @Order(2)
+//    public void testRegistration_failure() throws Exception {
+//        UserDto dto = new UserDto(
+//                incorrectUser.getUsername(),
+//                incorrectUser.getName(),
+//                incorrectUser.getEmail(),
+//                incorrectUser.getPassword(),
+//                stringRoles(incorrectUser.getRoles())
+//        );
+//
+//        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/registration")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(dto));
+//
+//        mockMvc.perform(mockRequest)
+//                .andExpect(status().is5xxServerError());
+//    }
+
+    @Test
+    @Order(2)
+    public void testLogin_success() throws Exception {
+        LoginRequestDto studentDto = new LoginRequestDto(
+                student.getUsername(),
+                student.getPassword()
+        );
+
+        LoginRequestDto teacherDto = new LoginRequestDto(
+                teacher.getUsername(),
+                teacher.getPassword()
+        );
+
+        MockHttpServletRequestBuilder mockRequest1 = MockMvcRequestBuilders.post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(studentDto));
+
+        MockHttpServletRequestBuilder mockRequest2 = MockMvcRequestBuilders.post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(teacherDto));
+
+        ResultActions studentResult = mockMvc.perform(mockRequest1)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(student.getUsername())));
+
+        ResultActions teacherResult = mockMvc.perform(mockRequest2)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(teacher.getUsername())));
+
+        String str1 = studentResult.andReturn().getResponse().getContentAsString().split("token\":\"")[1];
+        studentToken = str1.substring(0, str1.length() - 2);
+
+        String str2 = teacherResult.andReturn().getResponse().getContentAsString().split("token\":\"")[1];
+        teacherToken = str2.substring(0, str2.length() - 2);
+    }
+
+    @Test
+    @Order(3)
+    public void testLogin_failure() throws Exception {
+        LoginRequestDto dto = new LoginRequestDto(
+                incorrectUser.getUsername(),
+                incorrectUser.getPassword()
+        );
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto));
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().is4xxClientError());
+        System.out.println(studentToken);
+    }
+
+    @Test
+    @Order(4)
+    public void testGetUser_success() throws Exception {
+        Long id = userService.findByUsername(teacher.getUsername()).get().getId();
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.get("/users/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + studentToken);
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(teacher.getUsername())))
+                .andExpect(jsonPath("$.name", is(teacher.getName())))
+                .andExpect(jsonPath("$.email", is(teacher.getEmail())));
+    }
+
+    @Test
+    @Order(4)
+    public void testGetUser_failure() throws Exception {
+        Long id = userService.findByUsername(teacher.getUsername()).get().getId();
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.get("/users/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Order(5)
+    public void testUpdateUser_success() throws Exception {
+        UserDto teacherDto = new UserDto(
+                "rene",
+                "rene dekart",
+                "rene@mail.ru",
+                null,
+                null
+        );
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.put("/users/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + teacherToken)
+                .content(objectMapper.writeValueAsString(teacherDto));
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(teacherDto.getUsername())))
+                .andExpect(jsonPath("$.name", is(teacherDto.getName())))
+                .andExpect(jsonPath("$.email", is(teacherDto.getEmail())));
+    }
+
+    @Test
+    @Order(6)
+    public void testUpdateUser_failure() throws Exception {
+        UserDto teacherDto = new UserDto(
+                "rene",
+                "rene dekart",
+                "rene@mail.ru",
+                null,
+                null
+        );
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.put("/users/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(teacherDto));
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Order(7)
+    @Rollback(value = false)
+    public void testDeleteUser_success() throws Exception {
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/delete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + studentToken);
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    @Order(8)
+    public void testDeleteUser_failure() throws Exception {
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/delete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(mockRequest)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Order(9)
+    public void testEnrollUser_success() throws Exception {
+
+    }
+
+    private List<String> stringRoles(List<Role> roles) {
+        return roles.stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
     }
 }
