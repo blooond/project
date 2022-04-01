@@ -1,10 +1,12 @@
 package com.example.jwtoken.api;
 
 import com.example.jwtoken.dto.LoginRequestDto;
+import com.example.jwtoken.dto.SubjectDto;
 import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.Status;
 import com.example.jwtoken.model.User;
+import com.example.jwtoken.repository.SubjectRepository;
 import com.example.jwtoken.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.*;
 
@@ -41,6 +42,7 @@ public class UserTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final SubjectRepository subjectRepository;
 
     private final User student;
     private final User teacher;
@@ -50,10 +52,12 @@ public class UserTests {
     private static String teacherToken = "";
 
     @Autowired
-    public UserTests(MockMvc mockMvc, ObjectMapper objectMapper, UserService userRepository) {
+    public UserTests(MockMvc mockMvc, ObjectMapper objectMapper, UserService userService,
+                     SubjectRepository subjectRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.userService = userRepository;
+        this.userService = userService;
+        this.subjectRepository = subjectRepository;
 
         List<Role> studentRoles = new ArrayList<>();
         studentRoles.add(new Role(
@@ -260,7 +264,7 @@ public class UserTests {
     @Order(5)
     public void testUpdateUser_success() throws Exception {
         UserDto teacherDto = new UserDto(
-                "rene",
+                null,
                 "rene dekart",
                 "rene@mail.ru",
                 null,
@@ -276,7 +280,6 @@ public class UserTests {
         mockMvc.perform(mockRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.username", is(teacherDto.getUsername())))
                 .andExpect(jsonPath("$.name", is(teacherDto.getName())))
                 .andExpect(jsonPath("$.email", is(teacherDto.getEmail())));
     }
@@ -285,7 +288,7 @@ public class UserTests {
     @Order(6)
     public void testUpdateUser_failure() throws Exception {
         UserDto teacherDto = new UserDto(
-                "rene",
+                null,
                 "rene dekart",
                 "rene@mail.ru",
                 null,
@@ -303,7 +306,67 @@ public class UserTests {
 
     @Test
     @Order(7)
-    @Rollback(value = false)
+    public void testEnrollUser_success() throws Exception {
+        String subjectName = "math";
+        SubjectDto subjectDto = new SubjectDto(
+                subjectName
+        );
+
+        MockHttpServletRequestBuilder createSubject = MockMvcRequestBuilders.post("/subjects/new")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + teacherToken)
+                .content(objectMapper.writeValueAsString(subjectDto));
+
+        mockMvc.perform(createSubject)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.name", is(subjectName)));
+
+        Long subjectId = subjectRepository.findByName(subjectName).get().getId();
+        MockHttpServletRequestBuilder enrollSubject = MockMvcRequestBuilders.put("/students/enroll/" +
+                        subjectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + studentToken);
+
+        mockMvc.perform(enrollSubject)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.username", is(student.getUsername())))
+                .andExpect(jsonPath("$.studentSubjects", notNullValue()));
+    }
+
+    @Test
+    @Order(8)
+    public void testEnrollUser_failure() throws Exception {
+        String subjectName = "russian";
+        SubjectDto subjectDto = new SubjectDto(
+                subjectName
+        );
+
+        MockHttpServletRequestBuilder createSubject = MockMvcRequestBuilders.post("/subjects/new")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer_" + teacherToken)
+                .content(objectMapper.writeValueAsString(subjectDto));
+
+        mockMvc.perform(createSubject)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", notNullValue()))
+                .andExpect(jsonPath("$.name", is(subjectName)));
+
+        Long subjectId = subjectRepository.findByName(subjectName).get().getId();
+        MockHttpServletRequestBuilder enrollSubject = MockMvcRequestBuilders.put("/students/enroll/" +
+                        subjectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+        mockMvc.perform(enrollSubject)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @Order(9)
     public void testDeleteUser_success() throws Exception {
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/delete")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -315,7 +378,7 @@ public class UserTests {
     }
 
     @Test
-    @Order(8)
+    @Order(10)
     public void testDeleteUser_failure() throws Exception {
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/delete")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -323,12 +386,6 @@ public class UserTests {
 
         mockMvc.perform(mockRequest)
                 .andExpect(status().is4xxClientError());
-    }
-
-    @Test
-    @Order(9)
-    public void testEnrollUser_success() throws Exception {
-
     }
 
     private List<String> stringRoles(List<Role> roles) {
