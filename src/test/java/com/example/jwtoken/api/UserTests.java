@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -36,7 +35,6 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Rollback
 public class UserTests {
 
     private final MockMvc mockMvc;
@@ -371,7 +369,7 @@ public class UserTests {
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/delete")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer_" + studentToken);
+                .header("Authorization", "Bearer_" + teacherToken);
 
         mockMvc.perform(mockRequest)
                 .andExpect(status().is2xxSuccessful());
@@ -388,7 +386,7 @@ public class UserTests {
                 .andExpect(status().is4xxClientError());
     }
 
-    private List<String> stringRoles(List<Role> roles) {
+    static List<String> stringRoles(List<Role> roles) {
         return roles.stream()
                 .map(Role::getName)
                 .collect(Collectors.toList());
