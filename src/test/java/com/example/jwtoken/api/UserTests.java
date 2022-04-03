@@ -151,26 +151,6 @@ public class UserTests {
                 .andExpect(jsonPath("$.email", is(teacher.getEmail())));
     }
 
-//    @Test
-//    @Order(2)
-//    public void testRegistration_failure() throws Exception {
-//        UserDto dto = new UserDto(
-//                incorrectUser.getUsername(),
-//                incorrectUser.getName(),
-//                incorrectUser.getEmail(),
-//                incorrectUser.getPassword(),
-//                stringRoles(incorrectUser.getRoles())
-//        );
-//
-//        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/registration")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(dto));
-//
-//        mockMvc.perform(mockRequest)
-//                .andExpect(status().is5xxServerError());
-//    }
-
     @Test
     @Order(2)
     public void testLogin_success() throws Exception {

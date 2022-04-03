@@ -7,10 +7,7 @@ import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.Status;
 import com.example.jwtoken.model.Subject;
-import com.example.jwtoken.model.User;
 import com.example.jwtoken.repository.SubjectRepository;
-import com.example.jwtoken.repository.UserRepository;
-import com.example.jwtoken.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -40,11 +37,8 @@ public class MarkTests {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
 
-    private static User student;
-    private static User teacher;
     private static Subject math;
     private static final int rate = 9;
 
@@ -52,11 +46,10 @@ public class MarkTests {
     private static String teacherToken = "";
 
     @Autowired
-    public MarkTests(MockMvc mockMvc, ObjectMapper objectMapper, UserRepository userRepository,
+    public MarkTests(MockMvc mockMvc, ObjectMapper objectMapper,
                         SubjectRepository subjectRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
     }
 
@@ -229,9 +222,6 @@ public class MarkTests {
 
         mockMvc.perform(mockRequest1);
         mockMvc.perform(mockRequest2);
-
-        student = userRepository.findByUsername(studentUsername).get();
-        teacher = userRepository.findByUsername(teacherUsername).get();
 
         //login and getting tokens
         LoginRequestDto studentLoginDto = new LoginRequestDto(

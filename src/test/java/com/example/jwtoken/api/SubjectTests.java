@@ -6,15 +6,12 @@ import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.Role;
 import com.example.jwtoken.model.Status;
 import com.example.jwtoken.model.Subject;
-import com.example.jwtoken.model.User;
 import com.example.jwtoken.repository.SubjectRepository;
-import com.example.jwtoken.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,60 +36,17 @@ public class SubjectTests {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
     private final SubjectRepository subjectRepository;
-
-    private final User student;
-    private final User teacher;
 
     private static String studentToken = "";
     private static String teacherToken = "";
 
     @Autowired
-    public SubjectTests(MockMvc mockMvc, ObjectMapper objectMapper, UserService userService,
+    public SubjectTests(MockMvc mockMvc, ObjectMapper objectMapper,
                      SubjectRepository subjectRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.userService = userService;
         this.subjectRepository = subjectRepository;
-
-        List<Role> studentRoles = new ArrayList<>();
-        studentRoles.add(new Role(
-                new Date(),
-                new Date(),
-                Status.ACTIVE,
-                "student")
-        );
-
-        List<Role> teacherRoles = new ArrayList<>();
-        teacherRoles.add(new Role(
-                new Date(),
-                new Date(),
-                Status.ACTIVE,
-                "teacher")
-        );
-
-        student = new User(
-                "egorchernooky",
-                "egor",
-                "egor@gmail.com",
-                "password",
-                studentRoles,
-                new Date(),
-                new Date(),
-                Status.ACTIVE
-        );
-
-        teacher = new User(
-                "renedekart",
-                "rene",
-                "rene@gmail.com",
-                "password",
-                teacherRoles,
-                new Date(),
-                new Date(),
-                Status.ACTIVE
-        );
     }
 
     @Test
@@ -249,21 +203,41 @@ public class SubjectTests {
     }
 
     private void initialization() throws Exception {
+        String studentUsername = "egorchernooky";
+        String teacherUsername = "renedekart";
+        String password = "password";
+
+        List<Role> studentRoles = new ArrayList<>();
+        studentRoles.add(new Role(
+                new Date(),
+                new Date(),
+                Status.ACTIVE,
+                "student")
+        );
+
+        List<Role> teacherRoles = new ArrayList<>();
+        teacherRoles.add(new Role(
+                new Date(),
+                new Date(),
+                Status.ACTIVE,
+                "teacher")
+        );
+
         //create new users
         UserDto studentDto = new UserDto(
-                student.getUsername(),
-                student.getName(),
-                student.getEmail(),
-                student.getPassword(),
-                stringRoles(student.getRoles())
+                studentUsername,
+                "egor",
+                "egor@gmail.com",
+                password,
+                stringRoles(studentRoles)
         );
 
         UserDto teacherDto = new UserDto(
-                teacher.getUsername(),
-                teacher.getName(),
-                teacher.getEmail(),
-                teacher.getPassword(),
-                stringRoles(teacher.getRoles())
+                teacherUsername,
+                "rene",
+                "rene@gmail.com",
+                password,
+                stringRoles(teacherRoles)
         );
 
         MockHttpServletRequestBuilder mockRequest1 = MockMvcRequestBuilders.post("/registration")
@@ -281,13 +255,13 @@ public class SubjectTests {
 
         //login and getting tokens
         LoginRequestDto studentLoginDto = new LoginRequestDto(
-                student.getUsername(),
-                student.getPassword()
+                studentUsername,
+                password
         );
 
         LoginRequestDto teacherLoginDto = new LoginRequestDto(
-                teacher.getUsername(),
-                teacher.getPassword()
+                teacherUsername,
+                password
         );
 
         MockHttpServletRequestBuilder loginRequest1 = MockMvcRequestBuilders.post("/login")
