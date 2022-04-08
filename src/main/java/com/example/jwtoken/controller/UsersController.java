@@ -1,9 +1,11 @@
 package com.example.jwtoken.controller;
 
 import com.example.jwtoken.dto.AnotherUserDto;
+import com.example.jwtoken.dto.AnotherSubjectDto;
 import com.example.jwtoken.dto.UserDto;
 import com.example.jwtoken.model.User;
 import com.example.jwtoken.repository.RoleRepository;
+import com.example.jwtoken.repository.SubjectRepository;
 import com.example.jwtoken.security.jwt.JwtProvider;
 import com.example.jwtoken.security.jwt.JwtUser;
 import com.example.jwtoken.service.UserService;
@@ -27,6 +29,7 @@ import java.util.Optional;
 public class UsersController {
 
     private UserService userService;
+    private SubjectRepository subjectRepository;
     private JwtProvider jwtProvider;
     private RoleRepository roleRepository;
 
@@ -53,6 +56,8 @@ public class UsersController {
         userDto.setEmail(dto.getEmail());
         userDto.setPassword(dto.getPassword());
         userDto.setRoles(roles);
+
+        userService.registration(userDto);
 
         return "redirect:/login";
     }
@@ -84,7 +89,7 @@ public class UsersController {
 
         res.addCookie(cookie);
 
-        return "redirect:/homepage";
+        return "redirect:/users/" + getCurrentUser().getId();
     }
 
     @DeleteMapping("/users/delete")
@@ -102,9 +107,19 @@ public class UsersController {
         return "redirect:/";
     }
 
-    @PutMapping("/students/enroll/{subjectId}")
-    public User enroll(@PathVariable Long subjectId) {
-        return userService.enroll(subjectId);
+    @GetMapping("/students/enroll")
+    public String enroll(Model model) {
+        model.addAttribute("subjects", subjectRepository.findAll());
+        model.addAttribute("dto", new AnotherSubjectDto());
+
+        return "users/enroll";
+    }
+
+    @PutMapping("/students/enroll")
+    public String enroll(@ModelAttribute AnotherSubjectDto dto) {
+        userService.enroll(dto.getSubject().getId());
+
+        return "redirect:/users/" + getCurrentUser().getId();
     }
 
     private User getCurrentUser() {

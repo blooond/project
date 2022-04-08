@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Show</title>
+</head>
+<body>
+<h3 th:text="${subject.name}"></h3>
+
+<h4 th:text="'Teacher: ' + ${subject.teacher.name}"></h4>
+
+<div>
+    <h4>Enrolled Students:</h4>
+    <ol th:each="student : ${subject.getEnrolledStudents()}">
+        <li th:text="${student.name}"></li>
+    </ol>
+</div>
+<div>
+    <h4>Marks:</h4>
+    <ol th:each="mark : ${marks}">
+        <li th:text="${mark}"></li>
+    </ol>
+</div>
+<form th:if="${subject.teacher.username == username}"
+      th:action="@{'/subjects/' + ${subject.getId()} + '/update'}">
+    <input type="submit" value="Edit">
+</form>
+<form th:if="${subject.teacher.username == username}"
+      th:action="@{'/subjects/' + ${subject.getId()} + '/delete'}"
+      th:method="delete">
+    <input type="submit" value="Delete"/>
+</form>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Enroll</title>
+</head>
+<body>
+<form th:method="PUT" th:action="@{/students/enroll}" th:object="${dto}">
+    <label for="subject">Choose subject to enroll:</label>
+    <select th:for="${dto.subject}" id="subject" name="subject" >
+        <option th:each="subject : ${subjects}"
+                th:value="${subject.id}"
+                th:text="${subject.name}"></option>
+    </select>
+    <br/>
+    <input type="submit" value="Enroll!"/>
+</form>
+</body>
+</html>

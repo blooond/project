@@ -5,28 +5,51 @@
 </head>
 <body>
 <h3 th:text="${user.name}"></h3>
+
+<h4 th:text="'Role: ' + ${user.getRoles().get(0).name}"></h4>
+
+<h4 th:text="'Username: ' + ${user.username}"></h4>
+
+<h4 th:text="'Email: ' + ${user.email}"></h4>
+
+<div th:if="${user.getRoles().get(0).name == 'teacher'}">
+    <h4>Your Subjects:</h4>
+    <ul th:each="subject : ${user.getTeacherSubjects()}">
+        <li>
+            <a th:text="${subject.name}"
+               th:href="@{'/subjects/' + ${subject.getId()}}">
+            </a>
+        </li>
+    </ul>
+    <form th:if="${userId == currentUser.id}"
+          th:action="@{/subjects/new}">
+        <input type="submit" value="Add Subject"/>
+    </form>
+</div>
+<div th:if="${user.getRoles().get(0).name == 'student'}">
+    <h4>Your Subjects:</h4>
+    <ul th:each="subject : ${user.getStudentSubjects()}">
+        <li>
+            <a th:text="${subject.name}"
+               th:href="@{'/subjects/' + ${subject.getId()}}">
+            </a>
+        </li>
+    </ul>
+    <form th:if="${userId == currentUser.id}"
+          th:action="@{/students/enroll}">
+        <input type="submit" value="Add Subject"/>
+    </form>
+</div>
 <br>
-<p th:text="${user.getRoles().get(0).name}"></p>
-<br>
-<p th:text="${user.username}"></p>
-<br>
-<p th:text="${user.email}"></p>
-<br>
-<p th:if="${user.getRoles().get(0).name == 'teacher'}"
-   th:each="subject : ${user.getTeacherSubjects()}"
-   th:text="subject.name">
-</p>
-<br>
-<p th:if="${user.getRoles().get(0).name == 'student'}"
-   th:each="subject : ${user.getStudentSubjects()}"
-   th:text="subject.name">
-</p>
-<br>
-<a th:if="${userId == currentUser.id}"
-   th:href="@{/users/update}"> Edit
-</a>
-<br>
-<form th:if="${userId == currentUser.id}" th:method="delete" th:action="@{/users/delete}" th:object="${user}">
+
+<form th:if="${userId == currentUser.id}"
+      th:action="@{/users/update}">
+    <input type="submit" value="Edit"/>
+</form>
+<form th:if="${userId == currentUser.id}"
+      th:method="delete"
+      th:action="@{/users/delete}"
+      th:object="${user}">
     <input type="submit" value="Delete"/>
 </form>
 </body>
