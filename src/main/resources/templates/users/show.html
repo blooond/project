@@ -25,5 +25,9 @@
 <a th:if="${userId == currentUser.id}"
    th:href="@{/users/update}"> Edit
 </a>
+<br>
+<form th:if="${userId == currentUser.id}" th:method="delete" th:action="@{/users/delete}" th:object="${user}">
+    <input type="submit" value="Delete"/>
+</form>
 </body>
 </html>

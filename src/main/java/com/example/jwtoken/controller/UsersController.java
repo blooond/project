@@ -16,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +70,7 @@ public class UsersController {
         return "users/edit";
     }
 
-    @PostMapping("/users/update")
+    @PutMapping("/users/update")
     public String update(@RequestBody @ModelAttribute UserDto dto,
                          HttpServletResponse res) {
 
@@ -89,8 +88,18 @@ public class UsersController {
     }
 
     @DeleteMapping("/users/delete")
-    public void delete() {
+    public String delete(HttpServletResponse res) {
+        Cookie cookie = new Cookie("Token", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setSecure(false);
+
+        res.addCookie(cookie);
+
         userService.delete();
+
+        return "redirect:/";
     }
 
     @PutMapping("/students/enroll/{subjectId}")
