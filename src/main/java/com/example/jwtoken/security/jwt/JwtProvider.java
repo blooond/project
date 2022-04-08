@@ -17,6 +17,7 @@ import com.example.jwtoken.security.UserDetailsServiceImpl;
 import com.example.jwtoken.service.UserService;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
@@ -36,7 +37,7 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expired}")
-    private Long jwtLifetime;
+    public Long jwtLifetime;
 
     @PostConstruct
     public void init() {
@@ -77,9 +78,15 @@ public class JwtProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-
         if (bearerToken != null && bearerToken.startsWith("Bearer_"))
             return bearerToken.substring(7);
+
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (var cookie : cookies)
+                if (Objects.equals(cookie.getName(), "Token"))
+                    return cookie.getValue();
+        }
 
         return null;
     }

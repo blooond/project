@@ -17,6 +17,7 @@ import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -130,6 +131,8 @@ public class UserService {
         if (dto.getPassword() != null)
             userToUpdate.setPassword(passwordEncoder.encode(dto.getPassword()));
 
+        userToUpdate.setUpdated(new Date());
+
         return userToUpdate;
     }
 
@@ -139,7 +142,7 @@ public class UserService {
         log.info("User with id  {} was deleted", userToDelete.getId());
     }
 
-    private  User getCurrentUser() {
+    private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         Optional<User> userOptional = userRepository.findByUsername(jwtUser.getUsername());

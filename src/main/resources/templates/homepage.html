@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h3 th:text="'Hello, ' + ${user.username}"></h3>
+<h2>Your new params was successfully saved!</h2>
+<a th:href="'/users/' + ${user.getId()}">Your page</a>
+</body>
+</html>

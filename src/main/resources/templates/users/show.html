@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+</head>
+<body>
+<h3 th:text="${user.name}"></h3>
+<br>
+<p th:text="${user.getRoles().get(0).name}"></p>
+<br>
+<p th:text="${user.username}"></p>
+<br>
+<p th:text="${user.email}"></p>
+<br>
+<p th:if="${user.getRoles().get(0).name == 'teacher'}"
+   th:each="subject : ${user.getTeacherSubjects()}"
+   th:text="subject.name">
+</p>
+<br>
+<p th:if="${user.getRoles().get(0).name == 'student'}"
+   th:each="subject : ${user.getStudentSubjects()}"
+   th:text="subject.name">
+</p>
+<br>
+<a th:if="${userId == currentUser.id}"
+   th:href="@{/users/update}"> Edit
+</a>
+</body>
+</html>
