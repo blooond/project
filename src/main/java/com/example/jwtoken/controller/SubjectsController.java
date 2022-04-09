@@ -3,6 +3,7 @@ package com.example.jwtoken.controller;
 import com.example.jwtoken.dto.SubjectDto;
 import com.example.jwtoken.model.Subject;
 import com.example.jwtoken.model.User;
+import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.security.jwt.JwtUser;
 import com.example.jwtoken.service.MarkService;
 import com.example.jwtoken.service.SubjectService;
@@ -24,6 +25,7 @@ public class SubjectsController {
     private SubjectService subjectService;
     private UserService userService;
     private MarkService markService;
+    private RoleRepository roleRepository;
 
     @GetMapping("/new")
     public String add(Model model) {
@@ -41,8 +43,11 @@ public class SubjectsController {
     public String show(@PathVariable Long subjectId,
                         Model model) {
         model.addAttribute("subject", subjectService.findById(subjectId).get());
-        model.addAttribute("username", getCurrentUser().getUsername());
-        model.addAttribute("marks", markService.getAll(subjectId));
+        model.addAttribute("currentUser", getCurrentUser());
+        model.addAttribute("subjectId", subjectId);
+        model.addAttribute("role", roleRepository.findByName("student"));
+        model.addAttribute("markService", markService);
+
         return "subjects/show";
     }
 

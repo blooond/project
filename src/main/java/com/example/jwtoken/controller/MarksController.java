@@ -2,23 +2,37 @@ package com.example.jwtoken.controller;
 
 import com.example.jwtoken.dto.MarkDto;
 import com.example.jwtoken.model.Mark;
+import com.example.jwtoken.repository.RoleRepository;
 import com.example.jwtoken.service.MarkService;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @AllArgsConstructor
 @RequestMapping("/marks")
 public class MarksController {
 
     private final MarkService markService;
 
+    @GetMapping("/subjects/{subjectId}/new")
+    public String add(@PathVariable Long subjectId,
+                      Model model) {
+        model.addAttribute("subjectId", subjectId);
+        model.addAttribute("markDto", new MarkDto());
+
+        return "marks/new";
+    }
+
     @PostMapping("/subjects/{subjectId}/new")
-    public Mark create(@PathVariable Long subjectId,
-                       @RequestBody MarkDto dto) {
-        return markService.create(dto, subjectId);
+    public String create(@PathVariable Long subjectId,
+                         @RequestBody @ModelAttribute MarkDto dto) {
+        markService.create(dto, subjectId);
+
+        return "redirect:/subjects/" + subjectId;
     }
 
     @GetMapping("/subjects/{subjectId}/all")
@@ -32,7 +46,9 @@ public class MarksController {
     }
 
     @DeleteMapping("/subjects/{subjectId}/delete")
-    public void delete(@PathVariable Long subjectId) {
+    public String delete(@PathVariable Long subjectId) {
         markService.delete(subjectId);
+
+        return "redirect:/subjects/" + subjectId;
     }
 }

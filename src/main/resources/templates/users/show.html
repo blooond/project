@@ -52,5 +52,13 @@
       th:object="${user}">
     <input type="submit" value="Delete"/>
 </form>
+<br>
+<br>
+<br>
+<form th:if="${userId == currentUser.id}"
+      th:method="post"
+      th:action="@{'/logout'}">
+    <input type="submit" value="Logout"/>
+</form>
 </body>
 </html>

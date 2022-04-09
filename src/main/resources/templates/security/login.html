@@ -6,7 +6,7 @@
 <body>
 <h3>LOGIN</h3>
 <form th:method="POST" th:action="@{/login}" th:object="${dto}">
-    <label for="name">Name</label>
+    <label for="name">Username</label>
     <input type="text" th:field="*{username}" id="name"/>
     <div style="color:red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
     <br/>

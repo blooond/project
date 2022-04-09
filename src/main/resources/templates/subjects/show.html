@@ -10,24 +10,35 @@
 
 <div>
     <h4>Enrolled Students:</h4>
-    <ol th:each="student : ${subject.getEnrolledStudents()}">
+    <ul th:each="student : ${subject.getEnrolledStudents()}">
         <li th:text="${student.name}"></li>
-    </ol>
+    </ul>
 </div>
 <div>
     <h4>Marks:</h4>
-    <ol th:each="mark : ${marks}">
+    <ul th:each="mark : ${markService.getAll(subjectId)}">
         <li th:text="${mark}"></li>
-    </ol>
+    </ul>
 </div>
-<form th:if="${subject.teacher.username == username}"
-      th:action="@{'/subjects/' + ${subject.getId()} + '/update'}">
-    <input type="submit" value="Edit">
+<form th:if="${currentUser.getRoles().contains(role)}"
+      th:action="@{'/marks/subjects/' + ${subject.getId()} + '/new'}">
+    <input th:if="${!markService.contains(subjectId, currentUser.getId())}" type="submit" value="Add Mark">
+    <input th:if="${markService.contains(subjectId, currentUser.getId())}" type="submit" value="Edit Mark">
 </form>
-<form th:if="${subject.teacher.username == username}"
+<form th:if="${currentUser.getRoles().contains(role)}"
+      th:action="@{'/marks/subjects/' + ${subject.getId()} + '/delete'}"
+      th:method="delete">
+    <input th:if="${markService.contains(subjectId, currentUser.getId())}" type="submit" value="Delete Mark">
+</form>
+<br>
+<form th:if="${subject.teacher.username == currentUser.username}"
+      th:action="@{'/subjects/' + ${subject.getId()} + '/update'}">
+    <input type="submit" value="Edit Subject">
+</form>
+<form th:if="${subject.teacher.username == currentUser.username}"
       th:action="@{'/subjects/' + ${subject.getId()} + '/delete'}"
       th:method="delete">
-    <input type="submit" value="Delete"/>
+    <input type="submit" value="Delete Subject"/>
 </form>
 </body>
 </html>

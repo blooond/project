@@ -64,7 +64,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/subjects/**").hasAuthority(ROLE_TEACHER)
                 .antMatchers("/marks/subjects/*/all").hasAnyAuthority(ROLE_STUDENT, ROLE_TEACHER)
                 .antMatchers("/marks/subjects/**").hasAuthority(ROLE_STUDENT)
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and()
+                .logout()
+                .deleteCookies("Token");
     }
 
     @Bean

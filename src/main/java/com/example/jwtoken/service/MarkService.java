@@ -89,6 +89,12 @@ public class MarkService {
         }
     }
 
+    public boolean contains(Long subjectId, User user) {
+        Optional<Mark> markOptional = markRepository.findById(new MarkKey(user.getId(), subjectId));
+
+        return markOptional.isPresent();
+    }
+
     private  User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
