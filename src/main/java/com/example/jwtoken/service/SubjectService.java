@@ -33,7 +33,7 @@ public class SubjectService {
 
         Subject subject = new Subject(
                 dto.getName(),
-                getCurrentUser(),
+                userService.getCurrentUser(),
                 new Date(),
                 new Date(),
                 Status.ACTIVE
@@ -68,13 +68,13 @@ public class SubjectService {
         Optional<Subject> subjectOptional = findById(subjectId);
         Subject subjectToUpdate = subjectOptional.get();
 
-        if (Objects.equals(subjectToUpdate.getTeacher(), getCurrentUser())) {
+        if (Objects.equals(subjectToUpdate.getTeacher(), userService.getCurrentUser())) {
             if (subjectDto.getName() != null)
                 subjectToUpdate.setName(subjectDto.getName());
 
         } else {
             log.info("Teacher with username '{}' can't update this subject",
-                     getCurrentUser().getUsername());
+                    userService.getCurrentUser().getUsername());
             throw new IllegalStateException();
         }
 
@@ -85,21 +85,13 @@ public class SubjectService {
         Optional<Subject> subjectOptional = findById(subjectId);
         Subject subjectToDelete = subjectOptional.get();
 
-        if (Objects.equals(subjectToDelete.getTeacher(), getCurrentUser())) {
+        if (Objects.equals(subjectToDelete.getTeacher(), userService.getCurrentUser())) {
             subjectRepository.delete(subjectToDelete);
         } else {
             log.info("Teacher with username '{}' can't update this subject",
-                    getCurrentUser().getUsername());
+                    userService.getCurrentUser().getUsername());
             throw new IllegalStateException();
         }
 
-    }
-
-    private  User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
-
-        return userOptional.get();
     }
 }

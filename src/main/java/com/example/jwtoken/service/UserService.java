@@ -142,7 +142,7 @@ public class UserService {
         log.info("User with id  {} was deleted", userToDelete.getId());
     }
 
-    private User getCurrentUser() {
+    public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         JwtUser jwtUser = (JwtUser) auth.getPrincipal();
         Optional<User> userOptional = userRepository.findByUsername(jwtUser.getUsername());

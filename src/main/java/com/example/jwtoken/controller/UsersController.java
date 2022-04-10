@@ -35,7 +35,7 @@ public class UsersController {
 
     @GetMapping("/homepage")
     public String home(Model model) {
-        model.addAttribute("user", getCurrentUser());
+        model.addAttribute("user", userService.getCurrentUser());
         return "homepage";
     }
 
@@ -64,14 +64,14 @@ public class UsersController {
 
     @GetMapping("/users/{userId}")
     public String show(@PathVariable Long userId, Model model) {
-        model.addAttribute("currentUser", getCurrentUser());
+        model.addAttribute("currentUser", userService.getCurrentUser());
         model.addAttribute("user", userService.findById(userId));
         return "users/show";
     }
 
     @GetMapping("users/update")
     public String edit(Model model) {
-        model.addAttribute("user", getCurrentUser());
+        model.addAttribute("user", userService.getCurrentUser());
         return "users/edit";
     }
 
@@ -89,7 +89,7 @@ public class UsersController {
 
         res.addCookie(cookie);
 
-        return "redirect:/users/" + getCurrentUser().getId();
+        return "redirect:/users/" + userService.getCurrentUser().getId();
     }
 
     @DeleteMapping("/users/delete")
@@ -119,14 +119,6 @@ public class UsersController {
     public String enroll(@ModelAttribute AnotherSubjectDto dto) {
         userService.enroll(dto.getSubject().getId());
 
-        return "redirect:/users/" + getCurrentUser().getId();
-    }
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
-
-        return userOptional.orElse(null);
+        return "redirect:/users/" + userService.getCurrentUser().getId();
     }
 }

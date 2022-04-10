@@ -32,7 +32,7 @@ public class MarkService {
     private final UserService userService;
 
     public Mark create(MarkDto dto, Long subjectId) {
-        User student = getCurrentUser();
+        User student = userService.getCurrentUser();
         Optional<Subject> subjectOptional = subjectService.findById(subjectId);
 
         if (!student.getStudentSubjects().contains(subjectOptional.get())) {
@@ -68,7 +68,7 @@ public class MarkService {
 
         return markRepository.findAll().stream()
                 .filter(mark -> Objects.equals(mark.getSubject(), subjectOptional.get())
-                && Objects.equals(mark.getStudent(), getCurrentUser()))
+                && Objects.equals(mark.getStudent(), userService.getCurrentUser()))
                 .map(Mark::getRate)
                 .collect(Collectors.toList())
                 .get(0);
@@ -78,7 +78,7 @@ public class MarkService {
         Optional<Subject> subjectOptional = subjectService.findById(subjectId);
         Mark markToDelete = markRepository.findAll().stream()
                 .filter(mark -> Objects.equals(mark.getSubject(), subjectOptional.get())
-                        && Objects.equals(mark.getStudent(), getCurrentUser()))
+                        && Objects.equals(mark.getStudent(), userService.getCurrentUser()))
                 .collect(Collectors.toList())
                 .get(0);
         if (markToDelete != null) {
@@ -93,13 +93,5 @@ public class MarkService {
         Optional<Mark> markOptional = markRepository.findById(new MarkKey(user.getId(), subjectId));
 
         return markOptional.isPresent();
-    }
-
-    private  User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
-
-        return userOptional.get();
     }
 }

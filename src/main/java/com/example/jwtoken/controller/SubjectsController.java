@@ -43,7 +43,7 @@ public class SubjectsController {
     public String show(@PathVariable Long subjectId,
                         Model model) {
         model.addAttribute("subject", subjectService.findById(subjectId).get());
-        model.addAttribute("currentUser", getCurrentUser());
+        model.addAttribute("currentUser", userService.getCurrentUser());
         model.addAttribute("subjectId", subjectId);
         model.addAttribute("role", roleRepository.findByName("student"));
         model.addAttribute("markService", markService);
@@ -71,14 +71,6 @@ public class SubjectsController {
     public String delete(@PathVariable Long subjectId) {
         subjectService.delete(subjectId);
 
-        return "redirect:/users/" + getCurrentUser().getId();
-    }
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        JwtUser jwtUser = (JwtUser) auth.getPrincipal();
-        Optional<User> userOptional = userService.findByUsername(jwtUser.getUsername());
-
-        return userOptional.orElse(null);
+        return "redirect:/users/" + userService.getCurrentUser().getId();
     }
 }
