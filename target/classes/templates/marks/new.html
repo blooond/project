@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h3>New Mark</h3>
+<form th:method="POST" th:action="@{'/marks/subjects/' + ${subjectId} + '/new'}" th:object="${markDto}">
+    <label for="rate">Name: </label>
+    <input type="text" th:field="*{rate}" id="rate"/>
+    <div style="color:red" th:if="${#fields.hasErrors('rate')}" th:errors="*{rate}"></div>
+    <br/>
+    <input type="submit" value="Create!"/>
+</form>
+</body>
+</html>

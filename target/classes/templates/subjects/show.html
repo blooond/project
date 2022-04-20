@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Show</title>
+</head>
+<body>
+<h3 th:text="${subject.name}"></h3>
+
+<h4 th:text="'Teacher: ' + ${subject.teacher.name}"></h4>
+
+<div>
+    <h4>Enrolled Students:</h4>
+    <ul th:each="student : ${subject.getEnrolledStudents()}">
+        <li th:text="${student.name}"></li>
+    </ul>
+</div>
+<div>
+    <h4>Marks:</h4>
+    <ul th:each="mark : ${markService.getAll(subjectId)}">
+        <li th:text="${mark}"></li>
+    </ul>
+</div>
+<form th:if="${currentUser.getRoles().contains(role)}"
+      th:action="@{'/marks/subjects/' + ${subject.getId()} + '/new'}">
+    <input th:if="${!markService.contains(subjectId, currentUser.getId())}" type="submit" value="Add Mark">
+    <input th:if="${markService.contains(subjectId, currentUser.getId())}" type="submit" value="Edit Mark">
+</form>
+<form th:if="${currentUser.getRoles().contains(role)}"
+      th:action="@{'/marks/subjects/' + ${subject.getId()} + '/delete'}"
+      th:method="delete">
+    <input th:if="${markService.contains(subjectId, currentUser.getId())}" type="submit" value="Delete Mark">
+</form>
+<br>
+<form th:if="${subject.teacher.username == currentUser.username}"
+      th:action="@{'/subjects/' + ${subject.getId()} + '/update'}">
+    <input type="submit" value="Edit Subject">
+</form>
+<form th:if="${subject.teacher.username == currentUser.username}"
+      th:action="@{'/subjects/' + ${subject.getId()} + '/delete'}"
+      th:method="delete">
+    <input type="submit" value="Delete Subject"/>
+</form>
+</body>
+</html>

@@ -1,0 +1,7 @@
+com/example/jwtoken/repository/MarkTests.class
+com/example/jwtoken/api/UserTests.class
+com/example/jwtoken/repository/UserTests.class
+com/example/jwtoken/repository/JwtokenApplicationTests.class
+com/example/jwtoken/repository/SubjectTests.class
+com/example/jwtoken/api/MarkTests.class
+com/example/jwtoken/api/SubjectTests.class
