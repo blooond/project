@@ -22,5 +22,6 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=postgres
       - POSTGRES_DB=jwtapp
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - ./pg/data:/var/lib/postgresql/data
+      - .:/var/lib/postgresql/data
